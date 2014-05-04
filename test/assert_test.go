@@ -1,7 +1,7 @@
 package test
 
 import (
-	"jxck/assert"
+	".."
 	"testing"
 )
 
