@@ -8,7 +8,7 @@ assertion library for go test
 package test
 
 import (
-	"github.com/Jxck/assert"
+	"github.com/Jxck/assertion"
 	"testing"
 )
 
