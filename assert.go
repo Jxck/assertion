@@ -41,6 +41,10 @@ func intfmt(v reflect.Value) string {
 	return fmt.Sprintf("%d(%s)", v.Int(), v.Type().String())
 }
 
+func uintfmt(v reflect.Value) string {
+	return fmt.Sprintf("%d(%s)", v.Uint(), v.Type().String())
+}
+
 func boolfmt(v reflect.Value) string {
 	return fmt.Sprintf("%t(%s)", v.Bool(), v.Type().String())
 }
@@ -59,8 +63,10 @@ func slicefmt(v reflect.Value) string {
 
 func format(v reflect.Value) string {
 	switch v.Kind() {
-	case reflect.Int:
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		return intfmt(v)
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return uintfmt(v)
 	case reflect.String:
 		return strfmt(v)
 	case reflect.Bool:
@@ -74,9 +80,9 @@ func format(v reflect.Value) string {
 }
 
 func getInfo() string {
-		_, file, line, _ := runtime.Caller(2)
-		file = filepath.Base(file)
-		return fmt.Sprintf("%s:%d", file, line)
+	_, file, line, _ := runtime.Caller(2)
+	file = filepath.Base(file)
+	return fmt.Sprintf("%s:%d", file, line)
 }
 
 func Equal(t *testing.T, actual, expected interface{}) {
