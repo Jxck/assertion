@@ -41,7 +41,7 @@ func TestStruct(t *testing.T) {
 		lang  []string
 	}
 
-	actual := Foo{"john", 20, true, []string{"ja", "en"}}
+	actual := &Foo{"john", 20, true, []string{"ja", "en"}}
 	expected := Foo{"emily", 22, false, []string{"ja", "en", "ch"}}
 
 	assert.Equal(t, actual, expected)

@@ -77,6 +77,10 @@ func format(v reflect.Value) (string, string) {
 		return slicefmt(v)
 	case reflect.Struct:
 		return structfmt(v)
+	case reflect.Ptr:
+		v := reflect.Indirect(v)
+		vs, ts := format(v)
+		return vs, "&" + ts
 	}
 	return "", ""
 }
