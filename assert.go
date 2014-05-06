@@ -14,54 +14,56 @@ func init() {
 	log.SetFlags(log.Lshortfile)
 }
 
-func structfmt(v reflect.Value) (str string) {
+func structfmt(v reflect.Value) (string, string) {
 	typ := v.Type()
 	nf := typ.NumField()
-	str += "\n{\n"
+	str := "\n{\n"
 
 	inner := "\t"
 	for i := 0; i < nf; i++ {
 		tf := typ.Field(i)
 		fv := v.Field(i)
-		inner += fmt.Sprintf("%s:\t%s\n", tf.Name, format(fv))
+		v, t := format(fv)
+		inner += fmt.Sprintf("%s:\t%s(%s)\n", tf.Name, v, t)
 	}
 	inner = strings.Replace(inner, "\n", "\n\t", -1)
 	inner = strings.TrimSuffix(inner, "\t")
 	str += inner
 
-	str += "}\n"
-	return str
+	str += "}"
+	return str, v.Type().String()
 }
 
-func strfmt(v reflect.Value) string {
-	return fmt.Sprintf("%q(%s)", v.String(), v.Type().String())
+func strfmt(v reflect.Value) (string, string) {
+	return fmt.Sprintf("%q", v.String()), v.Type().String()
 }
 
-func intfmt(v reflect.Value) string {
-	return fmt.Sprintf("%d(%s)", v.Int(), v.Type().String())
+func intfmt(v reflect.Value) (string, string) {
+	return fmt.Sprintf("%d", v.Int()), v.Type().String()
 }
 
-func uintfmt(v reflect.Value) string {
-	return fmt.Sprintf("%d(%s)", v.Uint(), v.Type().String())
+func uintfmt(v reflect.Value) (string, string) {
+	return fmt.Sprintf("%d", v.Uint()), v.Type().String()
 }
 
-func boolfmt(v reflect.Value) string {
-	return fmt.Sprintf("%t(%s)", v.Bool(), v.Type().String())
+func boolfmt(v reflect.Value) (string, string) {
+	return fmt.Sprintf("%t", v.Bool()), v.Type().String()
 }
 
-func slicefmt(v reflect.Value) string {
+func slicefmt(v reflect.Value) (string, string) {
 	length := v.Len()
 	slice := v.Slice(0, length)
 
 	str := "["
 	for i := 0; i < length; i += 1 {
-		str = fmt.Sprintf("%s%v, ", str, format(slice.Index(i)))
+		v, _ := format(slice.Index(i))
+		str = fmt.Sprintf("%s%v, ", str, v)
 	}
 	str += "\b\b]"
-	return fmt.Sprintf("%v(%s[%d])", str, v.Type().String(), length)
+	return fmt.Sprintf("%v", str), fmt.Sprintf("%s[%d]", v.Type().String(), length)
 }
 
-func format(v reflect.Value) string {
+func format(v reflect.Value) (string, string) {
 	switch v.Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		return intfmt(v)
@@ -76,7 +78,7 @@ func format(v reflect.Value) string {
 	case reflect.Struct:
 		return structfmt(v)
 	}
-	return ""
+	return "", ""
 }
 
 func getInfo() string {
@@ -89,13 +91,16 @@ func Equal(t *testing.T, actual, expected interface{}) {
 	if reflect.DeepEqual(actual, expected) {
 		// Do Nothing while its went well.
 	} else {
-		av := reflect.ValueOf(actual)
-		ev := reflect.ValueOf(expected)
+		a := reflect.ValueOf(actual)
+		e := reflect.ValueOf(expected)
+
+		av, at := format(a)
+		ev, et := format(e)
 
 		message := "\n"
 		message += getInfo() + "\n"
-		message += fmt.Sprintf("[actual]  :%s\n", format(av))
-		message += fmt.Sprintf("[expected]:%s\n", format(ev))
+		message += fmt.Sprintf("[actual]  :%s(%s)\n", av, at)
+		message += fmt.Sprintf("[expected]:%s(%s)\n", ev, et)
 
 		t.Error(message)
 	}
